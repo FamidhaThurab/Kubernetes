@@ -1,0 +1,48 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: space
+  labels:
+    app: space
+    color: green
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: space
+  template:
+    metadata:
+      labels:
+        app: space
+        color: green
+    spec:
+      containers:
+        - name: space
+          image: ubuntu18:latest
+          command: ["/usr/sbin/sshd","-D"]
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+          - name: home
+            mountPath: /home/
+          ports:
+            - containerPort: 22
+      volumes:
+        - name: home
+          hostPath:
+            path: /home/svc_idc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+  name: space-demo-service
+spec:
+  ports:
+    - port: 2222
+      targetPort: 22
+      nodePort: 32222
+  selector:
+    app: space
+  sessionAffinity: None
+  type: NodePort
